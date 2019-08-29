@@ -5,7 +5,6 @@ const shared = { baseScale: 1 }
 const textureLoader = new THREE.TextureLoader()
 
 const maxSprites = 3000 // stress test: 800000
-const maxFlashSprites = 1000
 
 const spriteTypes = new Map()
 
@@ -219,7 +218,7 @@ class SpriteList {
     function addPosition (x, y, z = 0) {
       positions[n++] = x / shared.baseScale
       positions[n++] = y / shared.baseScale
-      positions[n++] = z
+      positions[n++] = 0
     }
     let leftP = pos.x - halfSize.x
     let rightP = pos.x + halfSize.x
@@ -290,47 +289,6 @@ class SpriteList {
   }
 }
 
-class LineStats {
-  constructor (scene, netGraphSize) {
-    const material = new THREE.LineBasicMaterial({ color: 0xff0000 })
-
-    const geometry = new THREE.BufferGeometry()
-    const vertices = new Float32Array(netGraphSize * 3)
-    geometry.addAttribute('position', new THREE.BufferAttribute( vertices, 3))
-    geometry.attributes.position.dynamic = true
-    const line = new THREE.Line( geometry, material )
-    line.frustumCulled = false
-    scene.add(line)
-    this.geometry = geometry
-  }
-  draw (stats, camera) {
-    const pos = camera.position
-
-    const positions = this.geometry.attributes.position.array
-    this.geometry.attributes.position.needsUpdate = true
-
-    function addPosition (x, y, z = 1000) {
-      positions[n++] = x
-      positions[n++] = y
-      positions[n++] = z
-    }
-
-    let x = pos.x + camera.left
-    let yFloor = pos.y + camera.bottom
-    let offset = 40
-    let n = 0
-
-    //repeat with stat.inbox, stat.diff
-    addPosition(x, yFloor - offset)
-    for (let stat of stats.framesQueued) {
-      let yTop = yFloor - stat.inbox - offset
-      addPosition(x, yTop)
-      x++
-    }
-    this.geometry.setDrawRange(0, stats.framesQueued.length)
-  }
-}
-
 export default class Renderer {
   constructor (netGraphSize) {
     if (WEBGL.isWebGL2Available() === false) {
@@ -355,8 +313,6 @@ export default class Renderer {
     renderer.setSize(window.innerWidth, window.innerHeight, false)
 
     this.mainSprites = new SpriteList('spritesheet', scene, camera, maxSprites)
-    this.flashSprites = new SpriteList('spritesheet-flash', scene, camera, maxFlashSprites)
-    this.netStats = new LineStats(scene, netGraphSize)
     this.renderer = renderer
     this.scene = scene
     this.canvas = canvas
@@ -366,9 +322,8 @@ export default class Renderer {
   }
   resetSprites () {
     this.mainSprites.reset()
-    this.flashSprites.reset()
   }
-  moveCamera (center, viewSize, viewScale) {
+  moveCamera (center) {
     this.camera.position.x = Math.floor(center.x / shared.baseScale)
     this.camera.position.y = Math.floor(center.y / shared.baseScale)
   }
@@ -384,17 +339,10 @@ export default class Renderer {
   addSprite (name, scale, pos, height, options = {}) {
     const spriteType = spriteTypes.get(name)
     if (spriteType) {
-      if (options.isFlash) {
-        this.flashSprites.addSprite(name, scale, pos, height, options)
-      } else {
-        this.mainSprites.addSprite(name, scale, pos, height, options)
-      }
+      this.mainSprites.addSprite(name, scale, pos, height, options)
     }
   }
   getSprite (name) {
     return spriteTypes.get(name)
-  }
-  drawNetworkStats (stats) {
-    this.netStats.draw(stats, this.camera)
   }
 }

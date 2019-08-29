@@ -40,14 +40,12 @@ function resize () {
   canvasEl.height = document.body.clientHeight
   glCanvasEl.width = canvasEl.width
   glCanvasEl.height = canvasEl.height
-  sidebarWidth = defaultSidebarWidth
   screenSize.x = canvasEl.width
   screenSize.y = canvasEl.height
-  viewSize.x = screenSize.x - sidebarWidth
+  viewSize.x = screenSize.x
   viewSize.y = screenSize.y
   ctx.imageSmoothingEnabled = false
-  let scale = 1
-  viewScale = 1 / scale
+  viewScale = 1
   // showing ${viewSize.x / viewScale / shared.baseScale}x${viewSize.y / viewScale / shared.baseScale}`)
   renderer.resize(viewSize, viewScale)
 }
@@ -182,22 +180,27 @@ window.addEventListener('mousemove', function (e) {
 requestAnimationFrame(tick)
 
 function tick (what) {
-  const isBackgroundTick = (what === 'background')
-  if (!isBackgroundTick) requestAnimationFrame(tick)
+  requestAnimationFrame(tick)
+  draw()
+  camera.x++
 }
 
 changePage('mainMenu')
 
 const worldSize = 100
-const world = [].repeat(worldSize).map(x => [].repeat(worldSize))
+const world = new Array(worldSize).fill(0).map(x => new Array(worldSize).fill(0))
 
-const camera = { x: 50, y: 50}
+const camera = { x: 0, y: 0 }
 
-const viewPort = {}
-const tileSize = 40
-viewPort.x = camera.x * tileSize - canvasEl.width / 2
-viewPort.y = camera.y * tileSize - canvasEl.height / 2
-viewPort.width = canvasEl.width
-viewPort.height = canvasEl.height
+function draw () {
+  const viewPort = {}
+  viewPort.x = camera.x - canvasEl.width / 2
+  viewPort.y = camera.y - canvasEl.height / 2
+  viewPort.width = canvasEl.width
+  viewPort.height = canvasEl.height
 
-shadowTiles.draw(viewPort, world, renderer)
+  shadowTiles.draw(viewPort, world, renderer)
+  renderer.moveCamera(camera)
+  renderer.render()
+  renderer.resetSprites()
+}
