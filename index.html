@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <title>Winter in Space 2</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width">
+    <script src="js/lib/WebGL.js"></script>
+  </head>
+<body>
+  <div class="page-loading page fullScreen">
+      <div class="pageSpacer"></div>
+      <h2>Loading</h2>
+      <div class="pageSpacer"></div>
+  </div>
+  <div class="page-main-menu page fullScreen hidden">
+    <div class="pageSpacer"></div>
+    <h1>Winter in Space 2</h1>
+    <div class="pageSpacer"></div>
+    <div class="menuBar">
+      <button class="playButton animate-flicker">play</button>
+    </div>
+  </div>
+  <div class="page-game fullScreen hidden">
+    <canvas class="glCanvas"></canvas>
+    <canvas class="gameCanvas"></canvas>
+    <div class="deadMenu menuBar hidden">
+      <p>Press 'R' to restart</p>
+    </div>
+  </div>
+  <div class='audioToggle'></div>
+  <script type="module" src="./js/client.js"></script>
+</body>
+</html>

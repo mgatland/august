@@ -1,0 +1,309 @@
+@import url('https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap');
+
+html {
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+}
+
+body {
+	margin: 0;
+	font-family: 'Press Start 2P', cursive;
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+	font-size: 14px;
+}
+
+h1 {
+	font-size: 64px;
+	line-height: 1.5em;
+	font-weight: normal;
+	margin: 42px;
+}
+
+.logo {
+	flex-shrink: 1;
+}
+
+button {
+	font-family: inherit;
+	color: white;
+	background-color: inherit;
+	margin: 0;
+	border: none;
+}
+
+button:focus, button *:focus {
+	text-shadow: -1px 0 orangered, 0 1px orangered, 1px 0 orangered, 0 -1px orangered;
+}
+
+.menuBar button {
+	font-size: 30px;
+	padding: 16px 32px;
+}
+
+button:hover, button *:hover {
+	color: rgb(250, 240, 183);
+}
+
+a {
+	color: #eee;
+	text-decoration: none;
+}
+
+canvas {
+	width: 100% !important;
+	height: 100% !important;
+}
+
+.gameCanvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+	cursor: url("./art/cursor.png") 23 23, auto;
+}
+
+.glCanvas {
+	display: block;
+	background-color: grey;
+}
+
+.fullScreen {
+	height: 100vh;
+	width: 100vw;
+}
+
+.page {
+	background-color: #08052d;
+	color: #ffd7a5;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	overflow: hidden;
+}
+
+.pageSpacer {
+	flex-grow: 1;
+  width: 300px;
+}
+
+.characterSlot {
+	display: flex;
+	align-items: center;
+	background-color: rgb(61, 61, 61);
+	border: none;
+	padding: 12px;
+	color: white;
+	margin: 20px auto;
+}
+
+.characterSlot img {
+	margin-right: 24px;
+}
+
+.classList {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.class {
+	width: 160px;
+	height: 160px;
+	border: 1px solid white;
+	background-color: #222;
+	margin: 10px;
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-evenly;
+}
+
+.classButton img {
+	margin-bottom: 24px;
+}
+
+.classButton:hover {
+	background-color: #666;	
+}
+
+
+.class h2 {
+	font-size: 14px;
+	font-weight: normal;
+}
+
+.menuBar {
+	width: 100%;
+	display: block;
+	background-color: rgb(61, 61, 61);
+	font-size: 30px;
+	margin-bottom: 100px;
+}
+
+.rightCorner {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+}
+
+.minorButton {
+	color: rgb(153, 153, 153);
+}
+
+.deadMenu {
+	position: absolute;
+	bottom: 0%; /* plus margin from menuBar */
+	text-align: center;
+}
+
+@keyframes flickerAnimation { /* flame pulses */
+  0%   { opacity:1; }
+  50%  { opacity:0.6; }
+  100% { opacity:1; }
+}
+
+.animate-flicker {
+    opacity:1;  
+    animation: flickerAnimation 1s infinite;
+}
+
+.minorHeading {
+	margin-top: 50px;
+	padding-bottom: 20px;
+	border-bottom: 2px solid #ffd7a5;
+	width: 100%;
+	margin-bottom: 0;
+}
+
+.scrollList {
+	flex: 1 1 auto;
+	overflow: scroll;
+	width: 100%;
+}
+
+.scrollList h2 {
+	margin: 60px 0 30px 0;
+}
+
+/* scrolling */
+.scrollList {
+	overflow-y: scroll;
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none;  /* IE 10+ */
+}
+.scrollList::-webkit-scrollbar { /* WebKit */
+	width: 0;
+	height: 0;
+}
+
+/* i know this is wrong */
+.menuSpacer {
+	width: 180px;
+	height: 10px;
+	display: inline-block;
+}
+
+.hidden {
+	display: none;
+}
+
+.borderButton {
+	border: 1px solid white;
+	padding: 12px;
+	background-color: rgb(61, 61, 61);
+}
+
+.borderButton:disabled, .borderButton:disabled:hover {
+	border-color: grey;
+	color: grey;
+}
+
+.borderButton:not(:last-child) {
+	margin-right: 14px;
+}
+
+label {
+	display: block;
+	margin: 14px;
+}
+
+input {
+	font-family: inherit;
+}
+
+.error {
+	margin: 14px;
+}
+
+.codeEntry {
+	display: flex;
+	justify-content: center;
+	margin: 32px;
+}
+
+.codeEntry input {
+	caret-color: transparent !important;
+	font-size: 28px;
+	margin: 2px;
+}
+
+.codeEntry input:focus {
+	border: 2px solid orangered;
+}
+
+.codeEntry input::selection {
+	background-color: inherit;
+}
+
+.content {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+
+	flex-grow: 1;
+	overflow: hidden;
+}
+
+.across {
+	display: flex;
+	flex-direction: row;
+}
+
+.bigErrorContainer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+	transform: translate(-50%, -50%);
+	color: white;
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+	pointer-events: none;
+}
+
+.bigError {
+	font-size: 48px;
+}
+
+.audioToggle {
+	position: fixed;
+	top: 8px;
+	left: 8px;
+	width: 64px;
+	height: 32px;
+	background-image: url("art/speaker.png");
+	image-rendering: crisp-edges;
+	background-size: 192px 32px;
+}
+
+.audioToggle.noMusic {
+	background-position-x: -64px;
+}
+
+.audioToggle.off {
+	background-position-x: -128px;
+}
