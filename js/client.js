@@ -180,9 +180,13 @@ requestAnimationFrame(tick)
 function tick () {
   update()
   requestAnimationFrame(tick)
-  camera.x = player.x * tileSize.x
-  camera.y = player.y * tileSize.y
+  camera.x = lerp(camera.x, player.x * tileSize.x)
+  camera.y = lerp(camera.y, player.y * tileSize.y)
   draw()
+}
+
+function lerp (a, b) {
+  return (a * 0.95 + b * 0.05)
 }
 
 changePage('mainMenu')
