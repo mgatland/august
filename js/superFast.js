@@ -27,8 +27,8 @@ const tileSpritesToLoad = [ 'Plain Block', 'Stone Block', 'Dirt Block', 'Grass B
   'Wall Front', 'Grass2 Block']
 
 function defineSprite (spriteDefinition) {
-  spriteDefinition.xOff = spriteDefinition.xOff === undefined ? 0.5 : spriteDefinition.xOff
-  spriteDefinition.yOff = spriteDefinition.yOff === undefined ? 1 : spriteDefinition.yOff
+  spriteDefinition.xOff = spriteDefinition.xOff === undefined ? 0 : spriteDefinition.xOff
+  spriteDefinition.yOff = spriteDefinition.yOff === undefined ? 0 : spriteDefinition.yOff
 
   if (spriteDefinition.sheet === 'duck') {
     spriteDefinition.y += 256
@@ -56,7 +56,7 @@ function defineSprites () {
   defineSprite({ name: 'ghost', sheet: 'duck', x: 62, y: 18 * 0, w: 16, h: 18 })
   defineSprite({ name: 'fox', sheet: 'duck', x: 78, y: 18 * 0, w: 16, h: 18 })
   defineSprite({ name: 'bag', sheet: 'duck', x: 0, y: 18 * 6, w: 16, h: 18 })
-  defineSprite({ name: 'shadow', sheet: 'duck', x: 0, y: 55, w: 9, h: 3, yOff: 0.5 })
+  defineSprite({ name: 'shadow', sheet: 'duck', x: 0, y: 55, w: 9, h: 3 })
   defineSprite({ name: 'snake', sheet: 'duck', x: 121, y: 0, w: 24, h: 35 })
   defineSprite({ name: 'cyclops', sheet: 'duck', x: 145, y: 0, w: 16, h: 16 })
   defineSprite({ name: 'wight', sheet: 'duck', x: 161, y: 0, w: 16, h: 16 })

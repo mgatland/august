@@ -55,7 +55,6 @@ resize()
 function changePage (mode) {
   if (currentPage === mode) return
   currentPage = mode
-  console.log('change page to ' + mode)
   showHideEl(loadingPageEl, mode === 'loading')
   showHideEl(mainMenuEl, mode === 'mainMenu')
   showHideEl(gamePageEl, mode === 'game')
@@ -132,7 +131,6 @@ window.addEventListener('keydown', function (e) {
   // todo: fix key (and mouse) hit and released within a single frame
   if (e.repeat) return
   const keyCode = e.key.toLowerCase()
-  this.console.log(keyCode)
   if (keyMappings.has(keyCode)) {
     if (!keysDown[keyMappings.get(keyCode)]) {
       keysHit[keyMappings.get(keyCode)] = true
@@ -179,10 +177,12 @@ window.addEventListener('mousemove', function (e) {
 
 requestAnimationFrame(tick)
 
-function tick (what) {
+function tick () {
+  update()
   requestAnimationFrame(tick)
+  camera.x = player.x * tileSize.x
+  camera.y = player.y * tileSize.y
   draw()
-  camera.x++
 }
 
 changePage('mainMenu')
@@ -190,7 +190,9 @@ changePage('mainMenu')
 const worldSize = 100
 const world = new Array(worldSize).fill(0).map(x => new Array(worldSize).fill(0))
 
+const tileSize = { x: 64, y: 64 }
 const camera = { x: 0, y: 0 }
+const player = { x: 0, y: 0 }
 
 function draw () {
   const viewPort = {}
@@ -200,7 +202,25 @@ function draw () {
   viewPort.height = canvasEl.height
 
   shadowTiles.draw(viewPort, world, renderer)
+  drawThing('lilppl0', player)
   renderer.moveCamera(camera)
   renderer.render()
   renderer.resetSprites()
+}
+
+function drawThing (name, pos) {
+  renderer.addSprite(name, 4, { x: pos.x * tileSize.x, y: pos.y * tileSize.y })
+}
+
+function update () {
+  if (keysHit['Down']) {
+    player.y++
+  } else if (keysHit['Up']) {
+    player.y--
+  } else if (keysHit['Left']) {
+    player.x--
+  } else if (keysHit['Right']) {
+    player.x++
+  }
+  for (const key in keysHit) keysHit[key] = false
 }
