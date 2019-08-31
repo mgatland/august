@@ -31,7 +31,11 @@ const words = `
 hello world time to save the world from trouble and prepare to make it double 
 the canvas provides a way to render artwork but not at high speeds unless you
 use accelerated graphics instead but performance can be an issue with high framerate
-until you optimise and send less data to the graphics card efficiently
+until you optimise and send less data to the graphics card efficiently 
+sometimes i wonder if this game will even be successful especially since the original
+developers of the genre released a sequel but their game is quite different and perhaps
+they themselves do not fully appreciate what they created the first time around 
+it is possible that their new game is completely different in focus and flavour
 `.replace(/[\n]/g, ' ').split(' ').filter(x => x.length > 0)
 
 const ctx = canvasEl.getContext('2d')
@@ -157,7 +161,7 @@ window.addEventListener('keydown', function (e) {
   const keyCode = e.key.toLowerCase()
   // We want to prevent arrow keys and spacebar from scrolling the page
   // However we must not prevent anything if the user is typing in an input!
-  if (e.target.tagName === 'BODY' && preventDefaultKeys.indexOf(keyCode) >= 0) {
+  if (currentPage === 'game' && e.target.tagName === 'BODY' && preventDefaultKeys.indexOf(keyCode) >= 0) {
     e.preventDefault()
   }
   if (!keysDown[keyCode]) keysHit[keyCode] = true
@@ -254,7 +258,7 @@ let lastBadAngle
 let spawnsSinceBadSpawn
 
 let attackerSpeed
-let maxAttackerSpeed = 2.6
+let maxAttackerSpeed = 1.6
 
 const camera = { x: 0, y: 0 }
 const player = { x: 0, y: 0 }
@@ -353,7 +357,7 @@ function update () {
     addAttacker()
     attackDelay = Math.floor(attackDelay * 0.95) + 1
     attackDelay = Math.max(minAttackDelay, attackDelay)
-    attackerSpeed = attackerSpeed * 1.02
+    attackerSpeed = attackerSpeed + 0.01
     attackerSpeed = Math.min(attackerSpeed, maxAttackerSpeed)
     attackTimer = attackDelay
   }
