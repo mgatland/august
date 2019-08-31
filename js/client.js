@@ -395,7 +395,7 @@ function update () {
       }
     }
   }
-  filterInPlace(attackers, (a) => a.y < maxSpawnDistance + 40)
+  filterInPlace(attackers, (a) => a.y < maxSpawnDistance + explosionRange)
   for (const key in keysHit) keysHit[key] = false
   camera.x = lerp(camera.x, player.x)
   camera.y = lerp(camera.y, player.y)
