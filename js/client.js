@@ -191,17 +191,24 @@ for (let x = 0; x < world.length; x++) {
 
 class Attacker {
   constructor (isSpecial) {
+    const isBad = (wasLastGood && Math.random() > 0.5)
+    const isRescuer = (!wasLastGood && !isSpecial)
     const worstLetter = secretKeeper ? secretKeeper.text[secretKeeper.progress] : undefined
     let goodWords = words.filter(w => !w.includes(worstLetter))
+    if (isBad) {
+      goodWords = words.filter(w => !goodWords.includes(w))
+    }
     if (goodWords.length === 0) goodWords = words // safety check
-    if (Math.random() > 0.8) goodWords = words // allow a bad word
     this.text = pickRandom(goodWords)
     this.progress = 0
     this.x = -400
     this.y = -400
     this.xv = 0
     this.yv = 0
-    const angle = Math.random() * Math.PI * 2
+    let angle = Math.random() * Math.PI * 2
+    if (isRescuer) {
+      angle = lastAngle + Math.random() * Math.PI / 2 - Math.PI / 4
+    }
     const distance = Math.random() * 200 + 600
     this.x = Math.cos(angle) * distance
     this.y = Math.sin(angle) * distance
@@ -209,7 +216,10 @@ class Attacker {
       this.isSpecial = true
       this.x = 0
       this.y = 300
-      this.text = 'i must not type this message'
+      this.text = 'type this to lose'
+    } else {
+      lastAngle = angle
+      wasLastGood = !isBad
     }
   }
 }
@@ -223,6 +233,10 @@ function addAttacker (opts) {
 let attackDelay
 let minAttackDelay = 60
 let attackTimer
+let score
+
+let lastAngle
+let wasLastGood
 
 let attackerSpeed
 let maxAttackerSpeed = 0.6
@@ -244,12 +258,13 @@ function draw () {
   // shadowTiles.draw(viewPort, world)
   drawThing('lilppl0', player)
   for (const a of attackers) {
-    drawThing('lilppl0', a)
+    drawThing(a.isSpecial ? '' : 'lilppl1', a)
     drawText(a)
   }
   for (const e of explosions) {
     drawExplosion(e)
   }
+  drawScore()
   renderer.moveCamera(camera)
   renderer.render()
   renderer.resetSprites()
@@ -263,9 +278,12 @@ function drawExplosion (e) {
   ctx.fillStyle = 'white'
   const { x, y } = drawPos(e)
   ctx.beginPath()
-  ctx.arc(x, y, explosionRange, 0, Math.PI * 2)
-  if (e.isTiny) {
+  ctx.arc(x, y, e.isKeeper ? 50 : explosionRange, 0, Math.PI * 2)
+  if (e.isOutline) {
     ctx.stroke()
+  } else if (e.isKeeper) {
+    ctx.fillStyle = 'red'
+    ctx.fill()
   } else {
     ctx.fill()
   }
@@ -289,7 +307,13 @@ function drawText (creature) {
   ctx.fillText(creature.text.substr(0, creature.progress), x, y)
 }
 
+function drawScore () {
+  ctx.fillStyle = 'white'
+  ctx.fillText('score: ' + score, canvasEl.width / 2, canvasEl.height - 40)
+}
+
 function restart () {
+  score = 0
   player.dead = false
   attackers.length = 0
   attackDelay = 60 * 3
@@ -298,13 +322,14 @@ function restart () {
   secretKeeper = addAttacker(true)
   explosions.length = 0
   restartButtonEl.classList.add('hidden')
+  lastAngle = 0
+  wasLastGood = false
 }
 
 function update () {
   if (player.dead) return
   attackTimer--
   if (attackTimer === 0) {
-    addAttacker()
     addAttacker()
     attackDelay = Math.floor(attackDelay * 0.95) + 1
     attackDelay = Math.max(minAttackDelay, attackDelay)
@@ -336,15 +361,20 @@ function update () {
       // skip spaces
       if (a.text[a.progress] === ' ') a.progress++
       if (a.progress === a.text.length) {
+        if (!a.dead) score++
         a.dead = true
         if (a.isSpecial) {
           endGame()
         } else {
           explode(a)
         }
-        
+
       } else {
-        if (!a.isSpecial) explosions.push(new Explosion(a, true))
+        if (a.isSpecial) {
+          explosions.push(new Explosion(a, 'keeper'))
+        } else {
+          explosions.push(new Explosion(a, 'outline'))
+        }
       }
     }
   }
@@ -368,18 +398,23 @@ function endGame () {
 function explode (a) {
   const targets = attackers.filter(x => distance(a, x) < explosionRange)
   for (const t of targets) {
-    t.dead = true
+    if (!t.dead && !t.isSpecial) {
+      t.dead = true
+      score++
+    }
   }
-  explosions.push(new Explosion(a))
+  explosions.push(new Explosion(a, 'big'))
 }
 
 class Explosion {
-  constructor (pos, isTiny) {
+  constructor (pos, type) {
     this.x = pos.x
     this.y = pos.y
     this.age = 0
-    this.maxAge = isTiny ? 1 : 15
-    this.isTiny = isTiny
+    this.maxAge = type === 'outline' ? 3 : 15
+    if (type === 'keeper') this.maxAge = 4
+    this.isOutline = type === 'outline'
+    this.isKeeper = type === 'keeper'
   }
 }
 
