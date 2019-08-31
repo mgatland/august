@@ -208,7 +208,7 @@ canvas {
 }
 
 .hidden {
-	display: none;
+	display: none !important;
 }
 
 .borderButton {
@@ -307,3 +307,13 @@ input {
 .audioToggle.off {
 	background-position-x: -128px;
 }
+
+.restartButton {
+	position: fixed;
+	left: 50%;
+	top: 70%;
+	transform: translate(-50%, -50%);
+	background-color: black;
+	font-size: 48px;
+}
+

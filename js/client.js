@@ -8,6 +8,7 @@ const loadingPageEl = document.querySelector('.page-loading')
 const gamePageEl = document.querySelector('.page-game')
 const mainMenuEl = document.querySelector('.page-main-menu')
 const playButtonEl = document.querySelector('.playButton')
+const restartButtonEl = document.querySelector('.restartButton')
 
 const audioToggleEl = document.querySelector('.audioToggle')
 
@@ -114,10 +115,13 @@ function updateMusic () {
 }
 
 playButtonEl.addEventListener('click', function () {
+  restart()
   changePage('game')
   audio.playHitSound() // to enable audio
   updateMusic()
 })
+
+restartButtonEl.addEventListener('click', restart)
 
 const keysDown = {}
 const keysHit = {}
@@ -216,11 +220,11 @@ function addAttacker (opts) {
   return newAttacker
 }
 
-let attackDelay = 60 * 3
+let attackDelay
 let minAttackDelay = 60
-let attackTimer = attackDelay
+let attackTimer
 
-let attackerSpeed = 0.3
+let attackerSpeed
 let maxAttackerSpeed = 0.6
 
 const camera = { x: 0, y: 0 }
@@ -285,7 +289,19 @@ function drawText (creature) {
   ctx.fillText(creature.text.substr(0, creature.progress), x, y)
 }
 
+function restart () {
+  player.dead = false
+  attackers.length = 0
+  attackDelay = 60 * 3
+  attackTimer = 60
+  attackerSpeed = 0.3
+  secretKeeper = addAttacker(true)
+  explosions.length = 0
+  restartButtonEl.classList.add('hidden')
+}
+
 function update () {
+  if (player.dead) return
   attackTimer--
   if (attackTimer === 0) {
     addAttacker()
@@ -305,6 +321,11 @@ function update () {
         const dY = Math.sin(angle) * attackerSpeed
         a.x += dX
         a.y += dY
+
+        const dist = distance(a, player)
+        if (dist < 3 && !player.dead) {
+          endGame()
+        }
       } else {
         a.y += 5
       }
@@ -316,7 +337,12 @@ function update () {
       if (a.text[a.progress] === ' ') a.progress++
       if (a.progress === a.text.length) {
         a.dead = true
-        explode(a)
+        if (a.isSpecial) {
+          endGame()
+        } else {
+          explode(a)
+        }
+        
       } else {
         if (!a.isSpecial) explosions.push(new Explosion(a, true))
       }
@@ -332,6 +358,11 @@ function update () {
     if (e.age > e.maxAge) e.dead = true
   }
   filterInPlace(explosions, e => !e.dead)
+}
+
+function endGame () {
+  player.dead = true
+  restartButtonEl.classList.remove('hidden')
 }
 
 function explode (a) {
