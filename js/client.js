@@ -1,6 +1,5 @@
 'use strict'
 /* eslint-disable no-console */
-import shadowTiles from './lib/shadowtiles.js'
 import audio from './lib/audio.js'
 import Renderer from './superFast.js'
 
@@ -24,8 +23,6 @@ const viewSize = { x: 0, y: 0 }
 const screenSize = { x: 0, y: 0 }
 let viewScale = 1
 
-const worldSize = 100
-const world = new Array(worldSize).fill(0).map(x => new Array(worldSize).fill(0))
 const explosionRange = 200
 const minSpawnDistance = 600
 const maxSpawnDistance = 620
@@ -73,8 +70,6 @@ function changePage (mode) {
 }
 
 const mousePos = { x: 0, y: 0 }
-
-shadowTiles.init(renderer)
 
 const preventDefaultKeys = ['backspace', 'tab', 'enter']
 
@@ -189,12 +184,6 @@ function lerp (a, b) {
 
 changePage('mainMenu')
 
-for (let x = 0; x < world.length; x++) {
-  for (let y = 0; y < world.length; y++) {
-    world[x][y] = Math.random() > 0.5 ? 0 : 1
-  }
-}
-
 class Attacker {
   constructor (isSpecial) {
     const isBad = (wasLastGood && Math.random() > 0.5)
@@ -261,7 +250,6 @@ function draw () {
   viewPort.width = canvasEl.width
   viewPort.height = canvasEl.height
 
-  // shadowTiles.draw(viewPort, world)
   drawThing('lilppl0', player)
   for (const a of attackers) {
     drawThing(a.isSpecial ? '' : 'lilppl1', a)
