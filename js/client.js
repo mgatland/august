@@ -206,8 +206,8 @@ changePage('mainMenu')
 
 class Attacker {
   constructor (isSpecial) {
-    const isBad = (wasLastGood && Math.random() > 0.5)
-    const isRescuer = (!wasLastGood && !isSpecial)
+    const isBad = (spawnsSinceBadSpawn >= 2 && Math.random() > 0.5)
+    const isRescuer = (spawnsSinceBadSpawn < 2 && !isSpecial)
     const worstLetter = secretKeeper ? secretKeeper.text[secretKeeper.progress] : undefined
     let goodWords = words.filter(w => !w.includes(worstLetter))
     if (isBad) {
@@ -218,7 +218,7 @@ class Attacker {
     this.progress = 0
     let angle = Math.random() * Math.PI * 2
     if (isRescuer) {
-      angle = lastAngle + Math.random() * Math.PI / 2 - Math.PI / 4
+      angle = lastBadAngle + Math.random() * Math.PI / 2 - Math.PI / 4
     }
     const distance = Math.random() * (maxSpawnDistance - minSpawnDistance) + minSpawnDistance
     this.x = Math.cos(angle) * distance
@@ -229,8 +229,12 @@ class Attacker {
       this.y = maxSpawnDistance * 0.8
       this.text = 'type this to lose'
     } else {
-      lastAngle = angle
-      wasLastGood = !isBad
+      if (isBad) {
+        spawnsSinceBadSpawn = 0
+        lastBadAngle = angle
+      } else {
+        spawnsSinceBadSpawn++
+      }
     }
   }
 }
@@ -246,11 +250,11 @@ let minAttackDelay = 60
 let attackTimer
 let score
 
-let lastAngle
-let wasLastGood
+let lastBadAngle
+let spawnsSinceBadSpawn
 
 let attackerSpeed
-let maxAttackerSpeed = 0.6
+let maxAttackerSpeed = 2.6
 
 const camera = { x: 0, y: 0 }
 const player = { x: 0, y: 0 }
@@ -338,8 +342,8 @@ function restart () {
   explosions.length = 0
   lightnings.length = 0
   restartButtonEl.classList.add('hidden')
-  lastAngle = 0
-  wasLastGood = false
+  lastBadAngle = 0
+  spawnsSinceBadSpawn = 0
 }
 
 function update () {
@@ -349,7 +353,7 @@ function update () {
     addAttacker()
     attackDelay = Math.floor(attackDelay * 0.95) + 1
     attackDelay = Math.max(minAttackDelay, attackDelay)
-    attackerSpeed = attackerSpeed * 1.01
+    attackerSpeed = attackerSpeed * 1.02
     attackerSpeed = Math.min(attackerSpeed, maxAttackerSpeed)
     attackTimer = attackDelay
   }
