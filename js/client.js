@@ -23,9 +23,9 @@ const viewSize = { x: 0, y: 0 }
 const screenSize = { x: 0, y: 0 }
 let viewScale = 1
 
-const explosionRange = 200
-const minSpawnDistance = 600
-const maxSpawnDistance = 620
+const explosionRange = 100
+const minSpawnDistance = 300
+const maxSpawnDistance = 310
 
 const words = `
 hello world time to save the world from trouble and prepare to make it double 
@@ -36,9 +36,29 @@ until you optimise and send less data to the graphics card efficiently
 
 const ctx = canvasEl.getContext('2d')
 ctx.imageSmoothingEnabled = false
-const creatureFont = '32px "Lucida Console", Monaco, monospace'
+const creatureFont = '16px "Lucida Console", Monaco, monospace'
 
 let currentPage = loadingPageEl
+
+function distance (a, b) {
+  const dx = Math.abs(a.x - b.x)
+  const dy = Math.abs(a.y - b.y)
+  return Math.sqrt(dx * dx + dy * dy)
+}
+
+function angleTo (p1, p2) {
+  return Math.atan2(p2.y - p1.y, p2.x - p1.x);
+}
+
+function pickRandom (list) {
+  return list[Math.floor(Math.random() * list.length)]
+}
+
+function randOffset () {
+  const a = 50
+  const b = a / 2
+  return Math.random() * a - b
+}
 
 function resize () {
   canvasEl.width = document.body.clientWidth
@@ -140,7 +160,7 @@ window.addEventListener('keydown', function (e) {
   if (e.target.tagName === 'BODY' && preventDefaultKeys.indexOf(keyCode) >= 0) {
     e.preventDefault()
   }
-  keysHit[keyCode] = true
+  if (!keysDown[keyCode]) keysHit[keyCode] = true
   keysDown[keyCode] = true
 })
 
@@ -196,10 +216,6 @@ class Attacker {
     if (goodWords.length === 0) goodWords = words // safety check
     this.text = pickRandom(goodWords)
     this.progress = 0
-    this.x = -400
-    this.y = -400
-    this.xv = 0
-    this.yv = 0
     let angle = Math.random() * Math.PI * 2
     if (isRescuer) {
       angle = lastAngle + Math.random() * Math.PI / 2 - Math.PI / 4
@@ -210,7 +226,7 @@ class Attacker {
     if (isSpecial) {
       this.isSpecial = true
       this.x = 0
-      this.y = 300
+      this.y = maxSpawnDistance * 0.8
       this.text = 'type this to lose'
     } else {
       lastAngle = angle
@@ -240,6 +256,7 @@ const camera = { x: 0, y: 0 }
 const player = { x: 0, y: 0 }
 const attackers = []
 const explosions = []
+const lightnings = []
 let secretKeeper
 
 function draw () {
@@ -258,6 +275,9 @@ function draw () {
   for (const e of explosions) {
     drawExplosion(e)
   }
+  for (const l of lightnings) {
+    l.draw()
+  }
   drawScore()
   renderer.moveCamera(camera)
   renderer.render()
@@ -272,13 +292,13 @@ function drawExplosion (e) {
   ctx.fillStyle = 'rgba(250, 200, 60, 0.5)'
   const { x, y } = drawPos(e)
   ctx.beginPath()
-  const radius = e.isKeeper ? 50 : explosionRange
+  const radius = e.isKeeper ? 25 : explosionRange - 20
   ctx.arc(x, y, radius * viewScale, 0, Math.PI * 2)
   if (e.isOutline) {
     ctx.stroke()
   } else if (e.isKeeper) {
-    ctx.fillStyle = 'red'
-    ctx.fill()
+    // ctx.fillStyle = 'red'
+    // ctx.fill()
   } else {
     ctx.fill()
   }
@@ -316,6 +336,7 @@ function restart () {
   attackerSpeed = 0.3
   secretKeeper = addAttacker(true)
   explosions.length = 0
+  lightnings.length = 0
   restartButtonEl.classList.add('hidden')
   lastAngle = 0
   wasLastGood = false
@@ -343,16 +364,17 @@ function update () {
         a.y += dY
 
         const dist = distance(a, player)
-        if (dist < 3 && !player.dead) {
+        if (dist < 1.5 && !player.dead) {
           endGame()
         }
       } else {
-        a.y += 5
+        a.y += 2.5
       }
     }
     const nextLetter = a.text[a.progress]
     if (keysHit[nextLetter]) {
       a.progress++
+      lightnings.push(new Lightning(a, player, a.isSpecial))
       // skip spaces
       if (a.text[a.progress] === ' ') a.progress++
       if (a.progress === a.text.length) {
@@ -373,7 +395,7 @@ function update () {
       }
     }
   }
-  filterInPlace(attackers, (a) => a.y < 1000)
+  filterInPlace(attackers, (a) => a.y < maxSpawnDistance + 40)
   for (const key in keysHit) keysHit[key] = false
   camera.x = lerp(camera.x, player.x)
   camera.y = lerp(camera.y, player.y)
@@ -383,6 +405,11 @@ function update () {
     if (e.age > e.maxAge) e.dead = true
   }
   filterInPlace(explosions, e => !e.dead)
+
+  for (const l of lightnings) {
+    l.update()
+  }
+  filterInPlace(lightnings, l => !l.dead)
 }
 
 function endGame () {
@@ -427,18 +454,52 @@ function filterInPlace (a, condition) {
   return a
 }
 
-function distance (a, b) {
-  const dx = Math.abs(a.x - b.x)
-  const dy = Math.abs(a.y - b.y)
-  return Math.sqrt(dx * dx + dy * dy)
-}
-
-function angleTo (p1, p2) {
-  return Math.atan2(p2.y - p1.y, p2.x - p1.x);
-}
-
-function pickRandom (list) {
-  return list[Math.floor(Math.random() * list.length)]
+class Lightning {
+  constructor (attacker, end, isSpecial) {
+    const start = { x: attacker.x, y: attacker.y }
+    const textSize = ctx.measureText(attacker.text)
+    const textSize2 = ctx.measureText(attacker.text.substr(0, attacker.progress))
+    start.x += textSize2.width - textSize.width / 2
+    start.y -= 32
+    this.start = { x: start.x, y: start.y }
+    this.end = { x: end.x, y: end.y }
+    this.age = 0
+    this.isSpecial = isSpecial
+    this.maxAge = isSpecial ? 75 : 15
+    this.update()
+  }
+  update () {
+    this.age++
+    if (this.age > this.maxAge) this.dead = true
+    if (this.age % 3 === 0 || !this.points) {
+      this.points = []
+      this.points.push(this.start)
+      let x = this.start.x
+      let y = this.start.y
+      let angle = angleTo(this.start, this.end)
+      const numPoints = 4
+      let dist = distance(this.start, this.end) / numPoints
+      for (let i = 0; i < numPoints; i++) {
+        x += Math.cos(angle) * dist
+        y += Math.sin(angle) * dist
+        this.points.push({ x: x + randOffset(), y: y + randOffset() })
+      }
+      this.points.push(this.end)
+    }
+  }
+  draw () {
+    ctx.strokeStyle = this.isSpecial ? 'yellow' : 'white'
+    ctx.lineWidth = this.isSpecial ? 2 : 1
+    ctx.beginPath()
+    let { x, y } = drawPos(this.start)
+    ctx.moveTo(x, y)
+    for (const p of this.points) {
+      let { x, y } = drawPos(p)
+      ctx.lineTo(x, y)
+    }
+    ctx.stroke()
+    ctx.lineWidth = 1
+  }
 }
 
 secretKeeper = addAttacker(true)

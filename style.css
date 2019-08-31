@@ -249,7 +249,7 @@ input {
 .restartButton {
 	position: fixed;
 	left: 50%;
-	top: 70%;
+	top: 30%;
 	transform: translate(-50%, -50%);
 	background-color: black;
 	font-size: 48px;
