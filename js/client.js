@@ -24,6 +24,12 @@ const viewSize = { x: 0, y: 0 }
 const screenSize = { x: 0, y: 0 }
 let viewScale = 1
 
+const worldSize = 100
+const world = new Array(worldSize).fill(0).map(x => new Array(worldSize).fill(0))
+const explosionRange = 200
+const minSpawnDistance = 600
+const maxSpawnDistance = 620
+
 const words = `
 hello world time to save the world from trouble and prepare to make it double 
 the canvas provides a way to render artwork but not at high speeds unless you
@@ -48,6 +54,10 @@ function resize () {
   viewSize.y = screenSize.y
   ctx.imageSmoothingEnabled = false
   viewScale = 1
+  if (canvasEl.height < maxSpawnDistance * 2) {
+    viewScale = canvasEl.height / (maxSpawnDistance * 2)
+  }
+
   // showing ${viewSize.x / viewScale / shared.baseScale}x${viewSize.y / viewScale / shared.baseScale}`)
   renderer.resize(viewSize, viewScale)
 }
@@ -179,10 +189,6 @@ function lerp (a, b) {
 
 changePage('mainMenu')
 
-const worldSize = 100
-const world = new Array(worldSize).fill(0).map(x => new Array(worldSize).fill(0))
-const explosionRange = 200
-
 for (let x = 0; x < world.length; x++) {
   for (let y = 0; y < world.length; y++) {
     world[x][y] = Math.random() > 0.5 ? 0 : 1
@@ -209,7 +215,7 @@ class Attacker {
     if (isRescuer) {
       angle = lastAngle + Math.random() * Math.PI / 2 - Math.PI / 4
     }
-    const distance = Math.random() * 200 + 600
+    const distance = Math.random() * (maxSpawnDistance - minSpawnDistance) + minSpawnDistance
     this.x = Math.cos(angle) * distance
     this.y = Math.sin(angle) * distance
     if (isSpecial) {
@@ -275,10 +281,11 @@ function drawThing (name, pos) {
 }
 
 function drawExplosion (e) {
-  ctx.fillStyle = 'white'
+  ctx.fillStyle = 'rgba(250, 200, 60, 0.5)'
   const { x, y } = drawPos(e)
   ctx.beginPath()
-  ctx.arc(x, y, e.isKeeper ? 50 : explosionRange, 0, Math.PI * 2)
+  const radius = e.isKeeper ? 50 : explosionRange
+  ctx.arc(x, y, radius * viewScale, 0, Math.PI * 2)
   if (e.isOutline) {
     ctx.stroke()
   } else if (e.isKeeper) {
@@ -290,8 +297,8 @@ function drawExplosion (e) {
 }
 
 function drawPos (pos) {
-  const x = pos.x - camera.x + screenSize.x / 2
-  const y = pos.y - camera.y + screenSize.y / 2
+  const x = viewScale * (pos.x - camera.x) + screenSize.x / 2
+  const y = viewScale * (pos.y - camera.y) + screenSize.y / 2
   return { x, y }
 }
 
