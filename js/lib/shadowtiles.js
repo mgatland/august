@@ -16,7 +16,7 @@ function setTile (name, depth, x, y, drawYAdjust = 0, viewScale, spriteScale, is
   renderer.addSprite(name, tileScale, { x: sprite.x, y: sprite.y }, 0)
 }
 
-function draw (viewPort, world, renderer) {
+function draw (viewPort, world) {
   const viewScale = 1
   const spriteScale = 1
 
@@ -42,5 +42,6 @@ export default { init, draw }
 function getTile (world, x, y) {
   const cell = world[x] ? world[x][y] : -1
   if (cell === 0) return ['Dirt Block', 0]
+  if (cell === 1) return ['Grass Block', 0]
   return ['Water Block', 0]
 }

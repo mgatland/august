@@ -27,8 +27,8 @@ const tileSpritesToLoad = [ 'Plain Block', 'Stone Block', 'Dirt Block', 'Grass B
   'Wall Front', 'Grass2 Block']
 
 function defineSprite (spriteDefinition) {
-  spriteDefinition.xOff = spriteDefinition.xOff === undefined ? 0 : spriteDefinition.xOff
-  spriteDefinition.yOff = spriteDefinition.yOff === undefined ? 0 : spriteDefinition.yOff
+  spriteDefinition.xOff = spriteDefinition.xOff === undefined ? 0.5 : spriteDefinition.xOff
+  spriteDefinition.yOff = spriteDefinition.yOff === undefined ? 0.5 : spriteDefinition.yOff
 
   if (spriteDefinition.sheet === 'duck') {
     spriteDefinition.y += 256
